@@ -15,14 +15,6 @@
  */
 package org.winlab.omniui;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.onosproject.net.Device;
-import org.onosproject.net.device.DeviceService;
-import org.onosproject.net.device.PortStatistics;
-import org.onlab.rest.BaseResource;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -31,44 +23,23 @@ import javax.ws.rs.core.Response;
  * Topology viewer resource.
  */
 @javax.ws.rs.Path("")
-public class Omniui extends BaseResource {
+public class Omniui{
 
-    @javax.ws.rs.Path("/switch/json")
-    @GET
-    @Produces("application/json")
-    public Response switches() {
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode root = mapper.createArrayNode();
-        Iterable<Device> devices = get(DeviceService.class).getDevices();
-
-        for (Device d : devices) {
-            ObjectNode device = mapper.createObjectNode();
-            Iterable<PortStatistics> portStatistics = get(DeviceService.class).getPortStatistics(d.id());
-            ArrayNode ports = mapper.createArrayNode();
-            for (PortStatistics p:portStatistics) {
-                ObjectNode port = mapper.createObjectNode();
-                port.put("PortNumber", p.port());
-                port.put("transmitPackets", p.packetsSent());
-                port.put("recvPackets", p.packetsReceived());
-                port.put("transmitBytes", p.bytesSent());
-                port.put("recvBytes", p.bytesReceived());
-                port.put("transmitDrop", p.packetsTxDropped());
-                port.put("recvDrop", p.packetsRxDropped());
-                ports.add(port);
-            }
-            device.set("ports", ports);
-
-            root.add(device);
-        }
-        return Response.ok(root.toString()).build();
-    }
+	@javax.ws.rs.Path("/switch/json")
+	@GET
+	@Produces("application/json")
+    	public Response switches() {
+		pktinfo pkt = new pktinfo();
+		String switchinfo = pkt.totalinfo();
+        	return Response.ok(switchinfo).build();
+    	}
     
 	@javax.ws.rs.Path("/switch/pktinfo")
 	@GET
 	@Produces("application/json")
 	public Response switchinfo() {
-	pktinfo pkt = new pktinfo();
-	String respon = pkt.testinfo();
-	return 	Response.ok(respon).build();
+		pktinfo pkt = new pktinfo();
+		String respon = pkt.testinfo();
+		return 	Response.ok(respon).build();
 	}
 }
