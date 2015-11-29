@@ -47,11 +47,13 @@ public class Omniui extends BaseResource {
             ArrayNode ports = mapper.createArrayNode();
             for (PortStatistics p:portStatistics) {
                 ObjectNode port = mapper.createObjectNode();
-                port.put("recvPackets", p.packetsReceived());
-                port.put("transmitPackets", p.packetsSent());
-                port.put("transmitBytes", p.bytesSent());
                 port.put("PortNumber", p.port());
+                port.put("transmitPackets", p.packetsSent());
+                port.put("recvPackets", p.packetsReceived());
+                port.put("transmitBytes", p.bytesSent());
                 port.put("recvBytes", p.bytesReceived());
+                port.put("transmitDrop", p.packetsTxDropped());
+                port.put("recvDrop", p.packetsRxDropped());
                 ports.add(port);
             }
             device.set("ports", ports);
