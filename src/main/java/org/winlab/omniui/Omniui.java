@@ -62,6 +62,13 @@ public class Omniui extends BaseResource {
         }
         return Response.ok(root.toString()).build();
     }
-
-
+    
+	@javax.ws.rs.Path("/switch/pktinfo")
+	@GET
+	@Produces("application/json")
+	public Response switchinfo() {
+	pktinfo pkt = new pktinfo();
+	String respon = pkt.testinfo();
+	return 	Response.ok(respon).build();
+	}
 }
