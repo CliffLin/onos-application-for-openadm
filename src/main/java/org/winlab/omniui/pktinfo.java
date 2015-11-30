@@ -18,13 +18,6 @@
  * Sample topology viewer application.
  */
 package org.winlab.omniui;
-import org.onlab.packet.Ethernet;
-import org.onlab.packet.IPv4;
-import org.onlab.packet.IpAddress;
-import org.onosproject.net.packet.InboundPacket;
-import org.onosproject.net.packet.PacketContext;
-import org.onosproject.net.packet.PacketProcessor;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,33 +28,9 @@ import org.onlab.rest.BaseResource;
 
 public class pktinfo extends BaseResource {
 
-	public class ReactivePacketProcessor implements PacketProcessor {
-	String srcmac;
-        @Override
-        public void process(PacketContext context) {
-
-		InboundPacket pkt = context.inPacket();
-            	Ethernet ethPkt = pkt.parsed();
-
-            	if (ethPkt == null) {
-                	return;
-            	}
- 
-	    	String EthType = Short.toString(ethPkt.getEtherType());
-            	if(EthType.equals("2048"))
-            		EthType = "IPv4";
-            	else if(EthType.equals("2054"))
-            		EthType = "ARP";
-		
-		srcmac="empty";
-	    //log.info("Src_MAC: " + ethPkt.getSourceMAC() + "  Dst_MAC: " + ethPkt.getDestinationMAC());
-	    //log.info("EthType: " + EthType + " Vlan: " + Short.toString(ethPkt.getVlanID()));
-	  }
-	}
-
 	public String testinfo() {
-	ReactivePacketProcessor pktprocess = new ReactivePacketProcessor();
-	return pktprocess.srcmac;
+
+	return "test";
 	}
 	
 	public String totalinfo(){
