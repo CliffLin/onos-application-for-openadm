@@ -29,17 +29,8 @@ public class Omniui{
 	@GET
 	@Produces("application/json")
     	public Response switches() {
-		pktinfo pkt = new pktinfo();
-		String switchinfo = pkt.totalinfo();
+		SwitchInfo sw = new SwitchInfo();
+		String switchinfo = sw.totalinfo();
         	return Response.ok(switchinfo).build();
     	}
-    
-	@javax.ws.rs.Path("/switch/pktinfo")
-	@GET
-	@Produces("application/json")
-	public Response switchinfo() {
-		pktinfo pkt = new pktinfo();
-		String respon = pkt.testinfo();
-		return 	Response.ok(respon).build();
-	}
 }

@@ -26,12 +26,7 @@ import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.device.PortStatistics;
 import org.onlab.rest.BaseResource;
 
-public class pktinfo extends BaseResource {
-
-	public String testinfo() {
-
-	return "test";
-	}
+public class SwitchInfo extends BaseResource {
 	
 	public String totalinfo(){
         	ObjectMapper mapper = new ObjectMapper();
