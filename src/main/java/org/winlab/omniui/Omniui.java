@@ -49,4 +49,13 @@ public class Omniui{
 		String info = controllerInfo.getInfo();
 		return Response.ok(info).build();
 	}
+	@javax.ws.rs.Path("/link/json")
+	@GET
+	@Produces("application/json")
+	public Response links(){
+		LinkInfo linkInfo = new LinkInfo();
+		String info = linkInfo.getLinks();
+		return Response.ok(info).build();
+	}
+
 }
