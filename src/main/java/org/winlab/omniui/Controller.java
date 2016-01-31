@@ -12,20 +12,18 @@ import java.util.Properties;
 /**
  * Created by zylin on 2016/1/24.
  */
-public class ControllerInfo {
-    public String getInfo() {
-        String OS = getOS();
-        String freeMem[] = getFreeMem();
-        String loadavg = getLoad();
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("type","ONOS");
-        objectNode.put("os",OS);
-        objectNode.put("mem_total",freeMem[0]);
-        objectNode.put("mem_used",freeMem[1]);
-        objectNode.put("mem_free",freeMem[2]);
-        objectNode.put("cpu",loadavg);
-        return objectNode.toString();
+public class Controller {
+    private String controller = Omniui.controller_name;
+    private String type = "ONOS";
+    private String mem_total = "";
+    private String mem_used = "";
+    private String mem_free = "";
+    private String os = "";
+    private String cpu = "";
+    public Controller() {
+        os = getOS();
+        getFreeMem();
+        cpu = getLoad();
     }
     private String getOS(){
         try {
@@ -37,7 +35,7 @@ public class ControllerInfo {
             return "OS info failed";
         }
     }
-    private String[] getFreeMem() {
+    private void getFreeMem() {
         try {
             Process p = Runtime.getRuntime().exec("free -h");
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -45,15 +43,13 @@ public class ControllerInfo {
             String freeLine = stdInput.readLine();
             String freeArray[] = freeLine.split("\\s+");
             String freeMem[] = new String[3];
-            freeMem[0] = freeArray[1];
-            freeMem[1] = freeArray[2];
-            freeMem[2] = freeArray[3];
-            return freeMem;
+            mem_total = freeArray[1];
+            mem_used = freeArray[2];
+            mem_free = freeArray[3];
         }
         catch (Exception e){
             String error[] = new String[3];
             Arrays.fill(error,"free mem info fail");
-            return error;
         }
     }
     private String getLoad(){
