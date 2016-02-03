@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class Link {
     private String controller = Omniui.controller_name;
-    private List<link> links = new ArrayList<link>();
+    private List<link> link = new ArrayList<link>();
     private class link {
         String dpid;
         String port;
@@ -18,6 +18,6 @@ public class Link {
         }
     }
     public void newLink(String dpid, String port) {
-        this.links.add(new link(dpid, port));
+        this.link.add(new link(dpid, port));
     }
 }

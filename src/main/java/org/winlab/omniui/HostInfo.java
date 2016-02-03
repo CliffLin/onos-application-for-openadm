@@ -54,6 +54,7 @@ public class HostInfo {
                 host.setMac(hostEvent.subject().mac().toString());
                 host.setVlan(hostEvent.subject().vlan().toString());
                 host.addLocation(hostEvent.subject().location().deviceId().toString(),hostEvent.subject().location().port().toString());
+                host.setType("wired");
                 switch (hostEvent.type()) {
                     case HOST_ADDED:
                     case HOST_UPDATED:

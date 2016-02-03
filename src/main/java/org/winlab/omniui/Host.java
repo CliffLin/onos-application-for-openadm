@@ -10,9 +10,9 @@ public class Host {
     private String controller = Omniui.controller_name;
     private String mac = "";
     private String vlan = "";
-    private String type = "";
+    private String type = "wired";
     private String ip = "";
-    private List<Location> locations = new ArrayList<Location>();
+    private Location location;
     private class Location {
         String dpid;
         String port;
@@ -26,6 +26,6 @@ public class Host {
     public void setType(String type) {this.type = type;}
     public void setIp(String ip) {this.ip = ip;}
     public void addLocation(String dpid, String port) {
-        locations.add(new Location(dpid, port));
+        location = new Location(dpid, port);
     }
 }

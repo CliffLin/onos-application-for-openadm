@@ -15,13 +15,14 @@ import java.net.URL;
  */
 public class SendMsg {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private String host = "http://192.168.42.142/publish/";
+    private String host = "http://192.168.42.142:32774/publish/";
     public boolean PostMsg(Object obj, String action, String type) {
         log.error("try post");
         Gson gson = new Gson();
         switch (type) {
             case "Link":
                 try {
+                    log.error("linnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnklinnnnnnnnk");
                     return request(new URL(host + action), gson.toJson((Link)(obj)));
                 } catch (Exception e) {
                     log.error("error postMsg : " + e.toString());

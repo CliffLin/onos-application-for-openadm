@@ -58,6 +58,7 @@ public class LinkInfo {
                 switch (linkEvent.type()) {
                     case LINK_UPDATED:
                     case LINK_ADDED:
+
                         send.PostMsg(((Object) link), "addlink", "Link");
                         log.info("Post Success");
                         break;
