@@ -17,35 +17,28 @@ package org.winlab.omniui;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ObjectArrays;
 import org.onlab.packet.*;
 import org.onosproject.core.DefaultGroupId;
 import org.onosproject.core.GroupId;
 import org.onosproject.net.DeviceId;
-import org.onosproject.net.IndexedLambda;
 import org.onosproject.net.PortNumber;
 import org.onosproject.net.flow.*;
-import org.onosproject.net.flow.criteria.Criterion;
-import org.onosproject.net.flow.criteria.EthTypeCriterion;
-import org.onosproject.net.flow.criteria.LambdaCriterion;
-import org.onosproject.net.flow.criteria.TcpPortCriterion;
-import org.onosproject.net.flow.instructions.Instruction;
-import org.onosproject.net.flow.instructions.Instructions;
-import org.onosproject.net.flow.instructions.Instructions.OutputInstruction;
+
 import org.onosproject.rest.AbstractWebResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.util.zip.Inflater;
 
 /**
  * Topology viewer resource.
  */
 @javax.ws.rs.Path("")
 public class Omniui extends AbstractWebResource {
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	public static String controller_name = "";
 	final FlowRuleService service = get(FlowRuleService.class);
 	@javax.ws.rs.Path("/controller/name")
@@ -55,13 +48,14 @@ public class Omniui extends AbstractWebResource {
 		controller_name = name;
 		return Response.ok("OK").build();
 	}
-	@javax.ws.rs.Path("add/json")
+	@javax.ws.rs.Path("/add/json")
 	@POST
 	@Produces("application/json")
 	@Consumes("application/json")
 	public Response flowmod(InputStream inputStream) {
 		try {
 			ObjectNode jsonTree = (ObjectNode) mapper().readTree(inputStream);
+			log.info(jsonTree.toString());
 			jsonTree.put("deviceId", jsonTree.get("dpid").toString());
 			jsonTree.remove("dpid");
 			jsonTree.remove("cookie");
@@ -81,41 +75,43 @@ public class Omniui extends AbstractWebResource {
 
 			ObjectNode criteria = (ObjectNode) mapper().createObjectNode();
 			FlowModEntry flowModEntry = new FlowModEntry(jsonTree.get("dpid").toString());
-			flowModEntry.selector = DefaultTrafficSelector.builder()
-					.matchEthDst(MacAddress.valueOf(jsonTree.get("dl_dst").textValue()))
-					.matchEthSrc(MacAddress.valueOf(jsonTree.get("dl_src").textValue()))
-					.matchEthType(Short.valueOf(jsonTree.get("eth_type").textValue()))
-					.matchIcmpCode(Byte.valueOf(jsonTree.get("icmpv4_code").textValue()))
-					.matchIcmpType(Byte.valueOf(jsonTree.get("icmpv4_type").textValue()))
-					.matchIcmpv6Code(Byte.valueOf(jsonTree.get("icmpv6_code").textValue()))
-					.matchIcmpv6Type(Byte.valueOf(jsonTree.get("icmpv6_type").textValue()))
-					.matchInPhyPort(PortNumber.portNumber(jsonTree.get("in_phy_port").textValue()))
-					.matchInPort(PortNumber.portNumber(jsonTree.get("in_port").textValue()))
-					.matchIPDscp(Byte.valueOf(jsonTree.get("ip_dscp").textValue()))
-					.matchIPEcn(Byte.valueOf(jsonTree.get("ip_ecn").textValue()))
-					.matchIPProtocol(Byte.valueOf(jsonTree.get("ip_proto").textValue()))
-					.matchIPDst(IpPrefix.valueOf(jsonTree.get("ipv4_dst").textValue()))
-					.matchIPSrc(IpPrefix.valueOf(jsonTree.get("ipv4_src").textValue()))
-					.matchIPv6Dst(IpPrefix.valueOf(jsonTree.get("ipv6_dst").textValue()))
-					.matchIPv6Src(IpPrefix.valueOf(jsonTree.get("ipv6_src").textValue()))
-					.matchIPv6ExthdrFlags(Short.valueOf(jsonTree.get("ipv6_exthdr").textValue()))
-					.matchIPv6FlowLabel(Integer.parseInt(jsonTree.get("ipv6_flabel").textValue()))
-					.matchIPv6NDSourceLinkLayerAddress(MacAddress.valueOf(jsonTree.get("ipv6_nd_sll").textValue()))
-					.matchIPv6NDTargetAddress(Ip6Address.valueOf(jsonTree.get("ipv6_nd_target").textValue()))
-					.matchIPv6NDTargetLinkLayerAddress(MacAddress.valueOf(jsonTree.get("ipv6_nd_tll").textValue()))
-					.matchMetadata(Long.valueOf(jsonTree.get("metadata").textValue()))
-					.matchMplsBos(Boolean.valueOf(jsonTree.get("mpls_bos").textValue()))
-					.matchMplsLabel(MplsLabel.mplsLabel(jsonTree.get("mpls_label").intValue()))
-					.matchSctpDst(TpPort.tpPort(jsonTree.get("sctp_dst").intValue()))
-					.matchSctpSrc(TpPort.tpPort(jsonTree.get("sctp_src").intValue()))
-					.matchTcpDst(TpPort.tpPort(jsonTree.get("tcp_dst").intValue()))
-					.matchTcpSrc(TpPort.tpPort(jsonTree.get("tcp_src").intValue()))
-					.matchTunnelId(jsonTree.get("tunnel_id").asLong())
-					.matchUdpDst(TpPort.tpPort(jsonTree.get("udp_dst").intValue()))
-					.matchUdpSrc(TpPort.tpPort(jsonTree.get("udp_src").intValue()))
-					.matchVlanId(VlanId.vlanId(jsonTree.get("vlan_vid").shortValue()))
-					.matchVlanPcp(Byte.valueOf(jsonTree.get("vlanP").textValue()))
-					.build();
+			TrafficSelector.Builder trafficBuilder = DefaultTrafficSelector.builder();
+			if(jsonTree.has("dl_dst")) { trafficBuilder.matchEthDst(MacAddress.valueOf(jsonTree.get("dl_dst").textValue())); }
+			if(jsonTree.has("eth_type")) { trafficBuilder.matchEthType(Short.valueOf(jsonTree.get("eth_type").textValue())); }
+			if(jsonTree.has("dl_src")) { trafficBuilder.matchEthSrc(MacAddress.valueOf(jsonTree.get("dl_src").textValue())); }
+			if(jsonTree.has("icmpv4_code")) { trafficBuilder.matchIcmpCode(Byte.valueOf(jsonTree.get("icmpv4_code").textValue())); }
+			if(jsonTree.has("icmpv4_type")) { trafficBuilder.matchIcmpType(Byte.valueOf(jsonTree.get("icmpv4_type").textValue())); }
+			if(jsonTree.has("icmpv6_code")) { trafficBuilder.matchIcmpv6Code(Byte.valueOf(jsonTree.get("icmpv6_code").textValue())); }
+			if(jsonTree.has("icmpv6_type")) { trafficBuilder.matchIcmpv6Type(Byte.valueOf(jsonTree.get("icmpv6_type").textValue())); }
+			if(jsonTree.has("in_phy_port")) { trafficBuilder.matchInPhyPort(PortNumber.portNumber(jsonTree.get("in_phy_port").textValue())); }
+			if(jsonTree.has("in_port")) { trafficBuilder.matchInPort(PortNumber.portNumber(jsonTree.get("in_port").textValue())); }
+			if(jsonTree.has("ip_dscp")) { trafficBuilder.matchIPDscp(Byte.valueOf(jsonTree.get("ip_dscp").textValue())); }
+			if(jsonTree.has("ip_ecn")) { trafficBuilder.matchIPEcn(Byte.valueOf(jsonTree.get("ip_ecn").textValue())); }
+			if(jsonTree.has("ip_proto")) { trafficBuilder.matchIPProtocol(Byte.valueOf(jsonTree.get("ip_proto").textValue())); }
+			if(jsonTree.has("ipv4_dst")) { trafficBuilder.matchIPDst(IpPrefix.valueOf(jsonTree.get("ipv4_dst").textValue())); }
+			if(jsonTree.has("ipv4_src")) { trafficBuilder.matchIPSrc(IpPrefix.valueOf(jsonTree.get("ipv4_src").textValue())); }
+			if(jsonTree.has("ipv6_dst")) { trafficBuilder.matchIPv6Dst(IpPrefix.valueOf(jsonTree.get("ipv6_dst").textValue())); }
+			if(jsonTree.has("ipv6_src")) { trafficBuilder.matchIPv6Src(IpPrefix.valueOf(jsonTree.get("ipv6_src").textValue())); }
+			if(jsonTree.has("ipv6_exthdr")) { trafficBuilder.matchIPv6ExthdrFlags(Short.valueOf(jsonTree.get("ipv6_exthdr").textValue())); }
+			if(jsonTree.has("ipv6_flabel")) { trafficBuilder.matchIPv6FlowLabel(Integer.parseInt(jsonTree.get("ipv6_flabel").textValue())); }
+			if(jsonTree.has("ipv6_nd_sll")) { trafficBuilder.matchIPv6NDSourceLinkLayerAddress(MacAddress.valueOf(jsonTree.get("ipv6_nd_sll").textValue())); }
+			if(jsonTree.has("ipv6_nd_target")) { trafficBuilder.matchIPv6NDTargetAddress(Ip6Address.valueOf(jsonTree.get("ipv6_nd_target").textValue())); }
+			if(jsonTree.has("ipv6_nd_tll")) { trafficBuilder.matchIPv6NDTargetLinkLayerAddress(MacAddress.valueOf(jsonTree.get("ipv6_nd_tll").textValue())); }
+			if(jsonTree.has("metadata")) { trafficBuilder.matchMetadata(Long.valueOf(jsonTree.get("metadata").textValue())); }
+			if(jsonTree.has("mpls_bos")) { trafficBuilder.matchMplsBos(Boolean.valueOf(jsonTree.get("mpls_bos").textValue())); }
+			if(jsonTree.has("mpls_label")) { trafficBuilder.matchMplsLabel(MplsLabel.mplsLabel(jsonTree.get("mpls_label").intValue())); }
+			if(jsonTree.has("sctp_dst")) { trafficBuilder.matchSctpDst(TpPort.tpPort(jsonTree.get("sctp_dst").intValue())); }
+			if(jsonTree.has("sctp_src")) { trafficBuilder.matchSctpSrc(TpPort.tpPort(jsonTree.get("sctp_src").intValue())); }
+			if(jsonTree.has("tcp_dst")) { trafficBuilder.matchTcpDst(TpPort.tpPort(jsonTree.get("tcp_dst").intValue())); }
+			if(jsonTree.has("tcp_src")) { trafficBuilder.matchTcpSrc(TpPort.tpPort(jsonTree.get("tcp_src").intValue())); }
+			if(jsonTree.has("tunnel_id")) { trafficBuilder.matchTunnelId(jsonTree.get("tunnel_id").asLong()); }
+			if(jsonTree.has("udp_dst")) { trafficBuilder.matchUdpDst(TpPort.tpPort(jsonTree.get("udp_dst").intValue())); }
+			if(jsonTree.has("udp_src")) { trafficBuilder.matchUdpSrc(TpPort.tpPort(jsonTree.get("udp_src").intValue())); }
+			if(jsonTree.has("vlan_vid")) { trafficBuilder.matchVlanId(VlanId.vlanId(jsonTree.get("vlan_vid").shortValue())); }
+			if(jsonTree.has("vlanP")) { trafficBuilder.matchVlanPcp(Byte.valueOf(jsonTree.get("vlanP").textValue())); }
+			TrafficSelector trafficSelector = trafficBuilder.build();
+			flowModEntry.selector = trafficSelector;
+
 			String actions[] = jsonTree.get("action").textValue().split(",");
 			TrafficTreatment.Builder builder =	DefaultTrafficTreatment.builder();
 			for (String act:actions ) {
@@ -153,6 +149,7 @@ public class Omniui extends AbstractWebResource {
 						break;
 				}
 			}
+			
 			flowModEntry.treatment = builder.build();
 			service.applyFlowRules(flowModEntry);
 			return Response.ok("{\"status\":\"success\"}").build();
